@@ -1,0 +1,23 @@
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.spin-animation {
+    animation: spin 8s linear infinite;
+    animation-play-state: paused;
+}
+
+.spin-animation.playing {
+    animation-play-state: running;
+}
+
+@keyframes pulseNeon {
+    0% { box-shadow: 0 0 10px var(--neon-blue); }
+    50% { box-shadow: 0 0 25px var(--neon-purple); }
+    100% { box-shadow: 0 0 10px var(--neon-blue); }
+}
+
+.neon-box {
+    animation: pulseNeon 3s infinite alternate;
+}
