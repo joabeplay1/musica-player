@@ -1,200 +1,94 @@
-<script type="module">
-// 1. Importações do Firebase (Padrão Profissional CDN)
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.1.0/firebase-app.js";
-import { getDatabase, ref, set, onValue, update } from "https://www.gstatic.com/firebasejs/9.1.0/firebase-database.js";
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Galactic Music Premium</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="styles/animations.css">
+    <!-- Google Fonts & Material Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <link rel="manifest" href="manifest.json">
+</head>
+<body>
+    <!-- Fundo Animado -->
+    <canvas id="galaxy-canvas"></canvas>
 
-// 2. Suas credenciais do projeto dama-77
-const firebaseConfig = {
-  apiKey: "AIzaSyAEhCjjnW2dzOd1gRLc0KHkf3lOEYqje0c",
-  authDomain: "dama-77.firebaseapp.com",
-  databaseURL: "https://dama-77-default-rtdb.firebaseio.com",
-  projectId: "dama-77",
-  storageBucket: "dama-77.firebasestorage.app",
-  messagingSenderId: "267002047594",
-  appId: "1:267002047594:web:4e8ce8f19f8e18b8a26e13",
-  measurementId: "G-LDXV8LCWTB"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-const gameId = "sala_principal"; // ID da sala
-const gameRef = ref(db, 'games/' + gameId);
-
-// ===== VARIÁVEIS DE ESTADO ONLINE =====
-let myRole = null; // 'black', 'white' ou 'spectator'
-
-// Constantes e Lógica (Mantidas do seu código original)
-const EMPTY = null, BLACK = 'b', WHITE = 'w', BLACK_KING = 'B', WHITE_KING = 'W';
-const isBlack = p => p === BLACK || p === BLACK_KING;
-const isWhite = p => p === WHITE || p === WHITE_KING;
-const isKing = p => p === BLACK_KING || p === WHITE_KING;
-const isPlayerPiece = (p, player) => player === 'black' ? isBlack(p) : isWhite(p);
-const opponentOf = player => player === 'black' ? 'white' : 'black';
-const inBounds = (r, c) => r >= 0 && r < 8 && c >= 0 && c < 8;
-const cloneBoard = b => b.map(r => [...r]);
-
-let board = [];
-let currentPlayer = 'black';
-let selectedPiece = null;
-let validMoves = [];
-let winner = null;
-let moveCount = 0;
-
-// ===== SINCRONIZAÇÃO FIREBASE =====
-onValue(gameRef, (snapshot) => {
-    const data = snapshot.val();
-    
-    if (!data) {
-        // Inicializa o jogo no servidor se não existir
-        const initial = createInitialBoard();
-        set(gameRef, {
-            board: initial,
-            turn: 'black',
-            moveCount: 0,
-            players: { black: true }
-        });
-        myRole = 'black';
-    } else {
-        board = data.board;
-        currentPlayer = data.turn;
-        moveCount = data.moveCount;
-        winner = data.winner;
-
-        // Atribuição de papel automática
-        if (!myRole) {
-            if (!data.players.white && data.players.black) {
-                update(ref(db, `games/${gameId}/players`), { white: true });
-                myRole = 'white';
-            } else if (data.players.black && data.players.white) {
-                myRole = 'spectator';
-            }
-        }
-
-        renderBoard();
-        updateUI();
-        if (winner) showWinner(winner);
-    }
-});
-
-// Funções de Lógica (Copiadas do seu original para manter as regras brasileiras)
-function createInitialBoard() {
-    const b = Array(8).fill(null).map(() => Array(8).fill(EMPTY));
-    for (let r = 0; r < 3; r++) for (let c = 0; c < 8; c++) if ((r+c)%2===1) b[r][c] = WHITE;
-    for (let r = 5; r < 8; r++) for (let c = 0; c < 8; c++) if ((r+c)%2===1) b[r][c] = BLACK;
-    return b;
-}
-
-function getSimpleMoves(board, r, c) {
-    const piece = board[r][c]; if (!piece) return [];
-    const moves = [];
-    if (isKing(piece)) {
-        for (const [dr,dc] of [[-1,-1],[-1,1],[1,-1],[1,1]]) {
-            let nr=r+dr, nc=c+dc;
-            while (inBounds(nr,nc) && board[nr][nc]===EMPTY) { moves.push({from:[r,c],to:[nr,nc],captures:[]}); nr+=dr; nc+=dc; }
-        }
-    } else {
-        const dir = isBlack(piece) ? -1 : 1;
-        for (const dc of [-1,1]) { const nr=r+dir, nc=c+dc; if (inBounds(nr,nc) && board[nr][nc]===EMPTY) moves.push({from:[r,c],to:[nr,nc],captures:[]}); }
-    }
-    return moves;
-}
-
-// ... (Inclua aqui as suas funções getCaptureSequences, getAllMoves, applyMove, checkWinner, countPieces exatamente como no seu código)
-
-// Função de Execução Adaptada para o Firebase
-function executeMove(move) {
-    if (myRole !== currentPlayer) return;
-
-    const nextBoard = applyMove(board, move);
-    const nextWinner = checkWinner(nextBoard, currentPlayer);
-    const nextTurn = nextWinner ? currentPlayer : opponentOf(currentPlayer);
-
-    update(gameRef, {
-        board: nextBoard,
-        turn: nextTurn,
-        moveCount: moveCount + 1,
-        winner: nextWinner || null
-    });
-
-    selectedPiece = null;
-    validMoves = [];
-}
-
-// Interface (Renderização dinâmica)
-window.renderBoard = function() {
-    const el = document.getElementById('board'); 
-    if (!el) return;
-    el.innerHTML = '';
-    for (let r = 0; r < 8; r++) {
-        for (let c = 0; c < 8; c++) {
-            const sq = document.createElement('div');
-            sq.className = 'sq ' + (((r + c) % 2 === 0) ? 'light' : 'dark');
+    <!-- App Container (Glassmorphism) -->
+    <div class="app-container">
+        <!-- Sidebar / Menu Principal -->
+        <aside class="sidebar glass-panel">
+            <div class="logo">
+                <span class="material-icons-round neon-text">graphic_eq</span>
+                <h2>G-Music</h2>
+            </div>
             
-            const isVM = validMoves.some(m => m.to[0] === r && m.to[1] === c);
-            if (isVM) sq.classList.add(validMoves[0].captures.length > 0 ? 'capture-move' : 'valid-move');
+            <nav class="menu">
+                <button class="menu-btn active" data-target="home"><span class="material-icons-round">home</span> Início</button>
+                <button class="menu-btn" data-target="playlist"><span class="material-icons-round">queue_music</span> Playlist</button>
+                <button class="menu-btn" data-target="upload"><span class="material-icons-round">cloud_upload</span> Adicionar Música</button>
+                <button class="menu-btn" data-target="rooms"><span class="material-icons-round">groups</span> Salas Online</button>
+                <button class="menu-btn" data-target="monitor"><span class="material-icons-round">analytics</span> Monitoramento</button>
+                <button class="menu-btn" data-target="gallery"><span class="material-icons-round">wallpaper</span> Galeria</button>
+            </nav>
 
-            const piece = board[r][c];
-            if (piece) {
-                const p = document.createElement('div');
-                const bk = isBlack(piece), kg = isKing(piece);
-                p.className = 'piece ' + (bk ? (kg ? 'black-k' : 'black-p') : (kg ? 'white-k' : 'white-p')) + (kg ? ' king' : '');
-                if (selectedPiece && selectedPiece[0] === r && selectedPiece[1] === c) p.classList.add('selected');
-                if (kg) { const cr = document.createElement('div'); cr.className = 'crown'; cr.textContent = '♛'; p.appendChild(cr); }
-                p.onclick = (e) => { e.stopPropagation(); handleClick(r, c); };
-                sq.appendChild(p);
-            }
-            sq.onclick = () => handleClick(r, c);
-            el.appendChild(sq);
-        }
-    }
-}
+            <div class="user-profile">
+                <img src="assets/icons/default-avatar.png" alt="Usuário" id="user-avatar">
+                <span id="user-name">Usuário Premium</span>
+            </div>
+        </aside>
 
-window.handleClick = function(r, c) {
-    if (winner || myRole !== currentPlayer) return;
-    const piece = board[r][c];
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- As seções dinâmicas entram aqui (Início, Playlist, Salas, etc) -->
+            <section id="home-view" class="view active">
+                <h1 class="neon-text">Bem-vindo ao Universo Musical</h1>
+                <div class="dashboard-widgets">
+                    <!-- Widgets de Equalizador e Status -->
+                    <div class="widget glass-panel">
+                        <h3>Música em Destaque</h3>
+                        <div id="visualizer"></div>
+                    </div>
+                </div>
+            </section>
+        </main>
 
-    if (piece && isPlayerPiece(piece, currentPlayer)) {
-        const allMoves = getAllMoves(board, currentPlayer);
-        const pMoves = allMoves.filter(m => m.from[0] === r && m.from[1] === c);
-        if (pMoves.length > 0) { selectedPiece = [r, c]; validMoves = pMoves; renderBoard(); return; }
-    }
+        <!-- Player Premium Flutuante (Bottom) -->
+        <footer class="player-container glass-panel">
+            <div class="track-info">
+                <img src="assets/covers/default.png" alt="Capa" id="current-cover" class="spin-animation">
+                <div class="track-details">
+                    <h4 id="track-title">Selecionar Música</h4>
+                    <p id="track-artist">Artista</p>
+                </div>
+                <button class="icon-btn"><span class="material-icons-round">favorite_border</span></button>
+            </div>
 
-    if (selectedPiece) {
-        const move = validMoves.find(m => m.to[0] === r && m.to[1] === c);
-        if (move) { executeMove(move); return; }
-    }
-    selectedPiece = null; validMoves = []; renderBoard();
-}
+            <div class="player-controls">
+                <div class="buttons">
+                    <button class="icon-btn" id="btn-shuffle"><span class="material-icons-round">shuffle</span></button>
+                    <button class="icon-btn" id="btn-prev"><span class="material-icons-round">skip_previous</span></button>
+                    <button class="play-btn neon-box" id="btn-play"><span class="material-icons-round">play_arrow</span></button>
+                    <button class="icon-btn" id="btn-next"><span class="material-icons-round">skip_next</span></button>
+                    <button class="icon-btn" id="btn-repeat"><span class="material-icons-round">repeat</span></button>
+                </div>
+                <div class="progress-container">
+                    <span id="time-current">0:00</span>
+                    <input type="range" id="progress-bar" value="0" max="100">
+                    <span id="time-total">0:00</span>
+                </div>
+            </div>
 
-window.updateUI = function() {
-    const counts = countPieces(board);
-    document.getElementById('stats-white').textContent = `${counts.white} peças · ${counts.whiteKings} damas`;
-    document.getElementById('stats-black').textContent = `${counts.black} peças · ${counts.blackKings} damas`;
-    document.getElementById('info-white').classList.toggle('active', currentPlayer === 'white');
-    document.getElementById('info-black').classList.toggle('active', currentPlayer === 'black');
-    
-    const roleMap = { 'black': 'Você (Pretas)', 'white': 'Você (Brancas)', 'spectator': 'Espectador' };
-    document.getElementById('turn-indicator').textContent = `${currentPlayer === 'black' ? '⚫' : '⚪'} Vez das ${currentPlayer === 'black' ? 'Pretas' : 'Brancas'} | Seu papel: ${roleMap[myRole]}`;
-}
+            <div class="volume-controls">
+                <span class="material-icons-round">volume_up</span>
+                <input type="range" id="volume-bar" value="100" max="100">
+            </div>
+        </footer>
+    </div>
 
-window.startGame = function() {
-    document.getElementById('menu').style.display = 'none';
-    document.getElementById('game').style.display = 'flex';
-};
-
-window.restartGame = function() {
-    if (myRole === 'spectator') return;
-    const initial = createInitialBoard();
-    set(gameRef, {
-        board: initial,
-        turn: 'black',
-        moveCount: 0,
-        winner: null,
-        players: { black: true, white: true }
-    });
-};
-
-window.goHome = function() { location.reload(); };
-
-// (Inclua aqui as funções auxiliares que faltarem do seu original como getAllMoves, applyMove, etc.)
-</script>
+    <!-- Firebase SDK (Módulos) -->
+    <script type="module" src="firebase/firebase-config.js"></script>
+    <script type="module" src="app.js"></script>
+</body>
+</html>
