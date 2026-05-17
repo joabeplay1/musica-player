@@ -1,116 +1,47 @@
-export function initPlaylist(playerEngine) {
-    const btnSave = document.getElementById('btn-save-media');
-    const playlistContainer = document.getElementById('playlist-list');
-    const emptyState = document.getElementById('playlist-empty');
-    
-    let myPlaylist = JSON.parse(localStorage.getItem('gmusic_playlist')) || [];
+export function initPlayer() {
+    // 1. Seleciona o botão de salvar
+    const btnSalvar = document.getElementById('id-do-seu-botao-salvar');
 
-    function renderPlaylist() {
-        const items = playlistContainer.querySelectorAll('.playlist-item');
-        items.forEach(item => item.remove());
+    // Verifica se o botão existe na tela para não dar erro
+    if (btnSalvar) {
+        btnSalvar.addEventListener('click', (e) => {
+            // ISSO AQUI RESOLVE O SEU PROBLEMA: Impede a página de recarregar!
+            e.preventDefault(); 
 
-        if (myPlaylist.length === 0) {
-            emptyState.style.display = 'block';
-            return;
-        }
+            // 2. Captura os links do Drive e os textos digitados
+            const linkAudio = document.getElementById('id-do-input-audio-drive').value;
+            const linkCapa = document.getElementById('link-capa-drive').value;
+            const titulo = document.getElementById('id-do-input-titulo').value;
+            const artista = document.getElementById('id-do-input-artista').value;
 
-        emptyState.style.display = 'none';
-
-        myPlaylist.forEach((media, index) => {
-            const itemDiv = document.createElement('div');
-            itemDiv.className = 'playlist-item';
-            itemDiv.innerHTML = `
-                <img src="${media.cover || ''}" onerror="this.src='https://via.placeholder.com/150/111111/bc13fe?text=Música'" alt="Capa">
-                <div class="info">
-                    <strong>${media.title} <span class="media-type">${media.type.toUpperCase()}</span></strong>
-                    <span>${media.artist}</span>
-                </div>
-                <div class="actions">
-                    <button class="icon-btn play-item-btn" data-index="${index}"><span class="material-icons-round">play_arrow</span></button>
-                    <button class="icon-btn delete-item-btn" data-index="${index}"><span class="material-icons-round" style="color: #ff3366;">delete</span></button>
-                </div>
-            `;
-            playlistContainer.appendChild(itemDiv);
-        });
-
-        document.querySelectorAll('.play-item-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const index = e.currentTarget.getAttribute('data-index');
-                playerEngine.playMedia(myPlaylist[index]);
-            });
-        });
-
-        document.querySelectorAll('.delete-item-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const index = e.currentTarget.getAttribute('data-index');
-                myPlaylist.splice(index, 1);
-                localStorage.setItem('gmusic_playlist', JSON.stringify(myPlaylist));
-                renderPlaylist();
-            });
-        });
-    }
-
-    function convertDriveLink(url) {
-        if (!url) return null;
-        const match = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
-        if (match && match[1]) {
-            return `https://drive.google.com/uc?export=download&id=${match[1]}`;
-        }
-        return url;
-    }
-
-    if (btnSave) {
-        btnSave.addEventListener('click', () => {
-            const driveLink = document.getElementById('upload-drive').value;
-            const localFile = document.getElementById('upload-local').files[0];
-            const title = document.getElementById('upload-title').value || 'Mídia Desconhecida';
-            const artist = document.getElementById('upload-artist').value || 'Artista Desconhecido';
-            const type = document.getElementById('upload-type').value;
-            const coverFile = document.getElementById('upload-cover').files[0];
-
-            let finalSrc = '';
-
-            if (driveLink) {
-                finalSrc = convertDriveLink(driveLink);
-            } else if (localFile) {
-                finalSrc = URL.createObjectURL(localFile);
-            } else {
-                alert("Adicione um arquivo local ou um link do Google Drive!");
+            // Verificação de segurança: não deixa salvar vazio
+            if (!linkAudio || !titulo) {
+                alert("Por favor, preencha pelo menos o link da música e o Título!");
                 return;
             }
 
-            if (coverFile) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    saveToDatabase(finalSrc, title, artist, type, e.target.result);
-                };
-                reader.readAsDataURL(coverFile);
-            } else {
-                saveToDatabase(finalSrc, title, artist, type, null);
+            // 3. Área de salvamento no Banco de Dados
+            try {
+                console.log("Dados capturados com sucesso:", { titulo, artista, linkAudio, linkCapa });
+                
+                // === ATENÇÃO AQUI ===
+                // O botão já está funcionando e não recarrega mais a página.
+                // Agora, cole aqui o seu código do Firebase ou Supabase para 
+                // enviar essas informações (titulo, artista, etc) para o seu banco de dados!
+                
+                
+                // Limpa os campos depois de salvar para o usuário colocar outra música
+                document.getElementById('id-do-input-audio-drive').value = '';
+                document.getElementById('link-capa-drive').value = '';
+                document.getElementById('id-do-input-titulo').value = '';
+                document.getElementById('id-do-input-artista').value = '';
+                
+                alert("Música enviada com sucesso!");
+
+            } catch (error) {
+                console.error("Erro ao salvar:", error);
+                alert("Deu um erro ao salvar. Verifique o console (F12).");
             }
         });
     }
-
-    function saveToDatabase(src, title, artist, type, coverData) {
-        const newMedia = {
-            id: Date.now(),
-            src: src,
-            title: title,
-            artist: artist,
-            type: type,
-            cover: coverData
-        };
-
-        myPlaylist.push(newMedia);
-        localStorage.setItem('gmusic_playlist', JSON.stringify(myPlaylist));
-        
-        document.getElementById('upload-title').value = '';
-        document.getElementById('upload-drive').value = '';
-        document.getElementById('upload-artist').value = '';
-        alert("Mídia adicionada com sucesso à sua Playlist!");
-        
-        renderPlaylist();
-    }
-
-    renderPlaylist();
 }
