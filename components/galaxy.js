@@ -1,50 +1,116 @@
-export function initGalaxy() {
-    const canvas = document.getElementById('galaxy-canvas');
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
+export function initPlaylist(playerEngine) {
+    const btnSave = document.getElementById('btn-save-media');
+    const playlistContainer = document.getElementById('playlist-list');
+    const emptyState = document.getElementById('playlist-empty');
     
-    let width = canvas.width = window.innerWidth;
-    let height = canvas.height = window.innerHeight;
+    let myPlaylist = JSON.parse(localStorage.getItem('gmusic_playlist')) || [];
 
-    const stars = [];
-    for (let i = 0; i < 400; i++) {
-        stars.push({
-            x: Math.random() * width,
-            y: Math.random() * height,
-            z: Math.random() * width,
-            radius: Math.random() * 1.5,
-            color: Math.random() > 0.5 ? '#00f3ff' : '#bc13fe'
+    function renderPlaylist() {
+        const items = playlistContainer.querySelectorAll('.playlist-item');
+        items.forEach(item => item.remove());
+
+        if (myPlaylist.length === 0) {
+            emptyState.style.display = 'block';
+            return;
+        }
+
+        emptyState.style.display = 'none';
+
+        myPlaylist.forEach((media, index) => {
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'playlist-item';
+            itemDiv.innerHTML = `
+                <img src="${media.cover || ''}" onerror="this.src='https://via.placeholder.com/150/111111/bc13fe?text=Música'" alt="Capa">
+                <div class="info">
+                    <strong>${media.title} <span class="media-type">${media.type.toUpperCase()}</span></strong>
+                    <span>${media.artist}</span>
+                </div>
+                <div class="actions">
+                    <button class="icon-btn play-item-btn" data-index="${index}"><span class="material-icons-round">play_arrow</span></button>
+                    <button class="icon-btn delete-item-btn" data-index="${index}"><span class="material-icons-round" style="color: #ff3366;">delete</span></button>
+                </div>
+            `;
+            playlistContainer.appendChild(itemDiv);
+        });
+
+        document.querySelectorAll('.play-item-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const index = e.currentTarget.getAttribute('data-index');
+                playerEngine.playMedia(myPlaylist[index]);
+            });
+        });
+
+        document.querySelectorAll('.delete-item-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const index = e.currentTarget.getAttribute('data-index');
+                myPlaylist.splice(index, 1);
+                localStorage.setItem('gmusic_playlist', JSON.stringify(myPlaylist));
+                renderPlaylist();
+            });
         });
     }
 
-    function animate() {
-        ctx.fillStyle = 'rgba(5, 5, 16, 0.3)';
-        ctx.fillRect(0, 0, width, height);
+    function convertDriveLink(url) {
+        if (!url) return null;
+        const match = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+        if (match && match[1]) {
+            return `https://drive.google.com/uc?export=download&id=${match[1]}`;
+        }
+        return url;
+    }
 
-        stars.forEach(star => {
-            star.z -= 0.5;
-            if (star.z <= 0) {
-                star.z = width;
-                star.x = Math.random() * width;
-                star.y = Math.random() * height;
+    if (btnSave) {
+        btnSave.addEventListener('click', () => {
+            const driveLink = document.getElementById('upload-drive').value;
+            const localFile = document.getElementById('upload-local').files[0];
+            const title = document.getElementById('upload-title').value || 'Mídia Desconhecida';
+            const artist = document.getElementById('upload-artist').value || 'Artista Desconhecido';
+            const type = document.getElementById('upload-type').value;
+            const coverFile = document.getElementById('upload-cover').files[0];
+
+            let finalSrc = '';
+
+            if (driveLink) {
+                finalSrc = convertDriveLink(driveLink);
+            } else if (localFile) {
+                finalSrc = URL.createObjectURL(localFile);
+            } else {
+                alert("Adicione um arquivo local ou um link do Google Drive!");
+                return;
             }
-            let x = (star.x - width / 2) * (width / star.z) + width / 2;
-            let y = (star.y - height / 2) * (width / star.z) + height / 2;
-            let r = star.radius * (width / star.z);
 
-            ctx.beginPath();
-            ctx.arc(x, y, r, 0, Math.PI * 2);
-            ctx.fillStyle = star.color;
-            ctx.shadowBlur = 10;
-            ctx.shadowColor = star.color;
-            ctx.fill();
+            if (coverFile) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    saveToDatabase(finalSrc, title, artist, type, e.target.result);
+                };
+                reader.readAsDataURL(coverFile);
+            } else {
+                saveToDatabase(finalSrc, title, artist, type, null);
+            }
         });
-        requestAnimationFrame(animate);
     }
-    animate();
 
-    window.addEventListener('resize', () => {
-        width = canvas.width = window.innerWidth;
-        height = canvas.height = window.innerHeight;
-    });
+    function saveToDatabase(src, title, artist, type, coverData) {
+        const newMedia = {
+            id: Date.now(),
+            src: src,
+            title: title,
+            artist: artist,
+            type: type,
+            cover: coverData
+        };
+
+        myPlaylist.push(newMedia);
+        localStorage.setItem('gmusic_playlist', JSON.stringify(myPlaylist));
+        
+        document.getElementById('upload-title').value = '';
+        document.getElementById('upload-drive').value = '';
+        document.getElementById('upload-artist').value = '';
+        alert("Mídia adicionada com sucesso à sua Playlist!");
+        
+        renderPlaylist();
+    }
+
+    renderPlaylist();
 }
