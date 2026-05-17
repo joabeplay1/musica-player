@@ -22,7 +22,7 @@
             <nav class="menu">
                 <button class="menu-btn active" data-target="home"><span class="material-icons-round">home</span> Início</button>
                 <button class="menu-btn" data-target="playlist"><span class="material-icons-round">queue_music</span> Playlist</button>
-                <button class="menu-btn" data-target="upload"><span class="material-icons-round">cloud_upload</span> Adicionar Música</button>
+                <button class="menu-btn" data-target="upload"><span class="material-icons-round">cloud_upload</span> Adicionar Mídia</button>
                 <button class="menu-btn" data-target="rooms"><span class="material-icons-round">groups</span> Salas Online</button>
                 <button class="menu-btn" data-target="monitor"><span class="material-icons-round">analytics</span> Monitor</button>
                 <button class="menu-btn" data-target="gallery"><span class="material-icons-round">wallpaper</span> Galeria</button>
@@ -46,12 +46,12 @@
             </section>
 
             <section id="playlist-view" class="view">
-                <h2 class="neon-text">Sua Playlist</h2>
+                <h2 class="neon-text">Sua Playlist Premium</h2>
                 <div class="playlist-container glass-panel">
                     <div id="playlist-list">
                         <div class="empty-state" id="playlist-empty">
                             <span class="material-icons-round" style="font-size: 48px; color: var(--text-secondary);">library_music</span>
-                            <p class="text-muted">Nenhuma música na playlist ainda.</p>
+                            <p class="text-muted">Nenhuma mídia salva. Adicione pelo Drive!</p>
                         </div>
                     </div>
                 </div>
@@ -65,8 +65,8 @@
                         <input type="text" id="upload-drive" placeholder="Cole o link público do Drive..." class="custom-input">
                     </div>
                     <div class="form-group">
-                        <label>Link da Capa (Imagem do Drive)</label>
-                        <input type="text" id="upload-cover" placeholder="Cole o link da imagem do Drive..." class="custom-input">
+                        <label>Link da Capa (Imagem do Drive ou Web)</label>
+                        <input type="text" id="upload-cover" placeholder="Cole o link da imagem da capa..." class="custom-input">
                     </div>
                     <div class="form-group">
                         <label>Título</label>
@@ -88,51 +88,21 @@
             </section>
 
             <section id="rooms-view" class="view">
-                <h2 class="neon-text">Salas Online (Sincronizadas)</h2>
-                <div class="rooms-actions" style="display: flex; gap: 20px; margin-bottom: 20px;">
-                    <button class="action-btn neon-box">Criar Nova Sala</button>
-                    <div class="join-room glass-panel" style="display: flex; gap: 10px; padding: 10px;">
-                        <input type="text" placeholder="Código da Sala" class="custom-input">
-                        <button class="action-btn outline">Entrar</button>
-                    </div>
-                </div>
-                <div class="rooms-list glass-panel">
-                    <p class="text-muted">Nenhuma sala ativa no momento.</p>
-                </div>
+                <h2 class="neon-text">Salas Online</h2>
+                <div class="rooms-list glass-panel"><p class="text-muted">Em breve...</p></div>
             </section>
 
             <section id="monitor-view" class="view">
-                <h2 class="neon-text">Monitoramento em Tempo Real</h2>
+                <h2 class="neon-text">Monitoramento</h2>
                 <div class="stats-grid">
-                    <div class="stat-card glass-panel">
-                        <span class="material-icons-round">people</span>
-                        <h4>Usuários Online</h4>
-                        <p class="neon-text">1</p>
-                    </div>
-                    <div class="stat-card glass-panel">
-                        <span class="material-icons-round">music_note</span>
-                        <h4>Músicas Tocando</h4>
-                        <p class="neon-text">0</p>
-                    </div>
-                    <div class="stat-card glass-panel">
-                        <span class="material-icons-round">meeting_room</span>
-                        <h4>Salas Ativas</h4>
-                        <p class="neon-text">0</p>
-                    </div>
+                    <div class="stat-card glass-panel"><span class="material-icons-round">people</span><h4>Usuários Online</h4><p class="neon-text">1</p></div>
                 </div>
             </section>
 
             <section id="gallery-view" class="view">
                 <h2 class="neon-text">Galeria Premium</h2>
                 <div class="gallery-grid">
-                    <div class="gallery-item glass-panel">
-                        <span class="material-icons-round">image</span>
-                        <p>Wallpapers</p>
-                    </div>
-                    <div class="gallery-item glass-panel">
-                        <span class="material-icons-round">album</span>
-                        <p>Capas Salvas</p>
-                    </div>
+                    <div class="gallery-item glass-panel"><span class="material-icons-round">image</span><p>Wallpapers</p></div>
                 </div>
             </section>
         </main>
