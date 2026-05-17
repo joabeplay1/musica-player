@@ -1,125 +1,87 @@
-export function initPlaylist(playerEngine) {
-    const btnSave = document.getElementById('btn-save-media');
-    const playlistContainer = document.getElementById('playlist-list');
-    const emptyState = document.getElementById('playlist-empty');
+export function initPlayer() {
+    const audio = new Audio();
+    let isPlaying = false;
     
-    // Recupera a playlist do LocalStorage
-    let myPlaylist = [];
-    try {
-        myPlaylist = JSON.parse(localStorage.getItem('gmusic_playlist')) || [];
-    } catch (e) {
-        console.warn("Criando nova playlist vazia.");
-        myPlaylist = [];
-    }
+    const playBtn = document.getElementById('btn-play');
+    const playIcon = playBtn ? playBtn.querySelector('.material-icons-round') : null;
+    const coverImage = document.getElementById('current-cover');
+    const titleDisplay = document.getElementById('track-title');
+    const artistDisplay = document.getElementById('track-artist');
+    
+    const videoModal = document.getElementById('video-modal');
+    const videoPlayer = document.getElementById('main-video-player');
+    const btnCloseVideo = document.getElementById('close-video-btn');
+    const videoTitleDisplay = document.getElementById('video-title-display');
 
-    function renderPlaylist() {
-        if (!playlistContainer) return;
+    const playerEngine = {
+        playMedia: function(media) {
+            if (media.type === 'video') {
+                audio.pause();
+                if(playIcon) playIcon.textContent = 'play_arrow';
+                if(coverImage) coverImage.classList.remove('playing');
+                
+                videoPlayer.src = media.src;
+                videoTitleDisplay.textContent = `${media.title} - ${media.artist}`;
+                videoModal.classList.remove('hidden');
+                videoPlayer.play();
+            } else {
+                audio.src = media.src;
+                if(titleDisplay) titleDisplay.textContent = media.title;
+                if(artistDisplay) artistDisplay.textContent = media.artist;
+                
+                if(coverImage) {
+                    const imgSrc = media.cover || 'https://via.placeholder.com/150/111111/bc13fe?text=Música';
+                    coverImage.innerHTML = `<img src="${imgSrc}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`;
+                }
 
-        // Limpa a lista atual
-        const items = playlistContainer.querySelectorAll('.playlist-item');
-        items.forEach(item => item.remove());
-
-        if (myPlaylist.length === 0) {
-            if (emptyState) emptyState.style.display = 'block';
-            return;
-        }
-
-        if (emptyState) emptyState.style.display = 'none';
-
-        // Constroi a lista
-        myPlaylist.forEach((media, index) => {
-            const itemDiv = document.createElement('div');
-            itemDiv.className = 'playlist-item';
-            
-            // Capa padrão se não houver link
-            const coverImage = media.cover || 'https://via.placeholder.com/150/111111/bc13fe?text=Play';
-            
-            itemDiv.innerHTML = `
-                <img src="${coverImage}" onerror="this.src='https://via.placeholder.com/150/111111/bc13fe?text=Erro'" alt="Capa">
-                <div class="info">
-                    <strong>${media.title} <span class="media-type">${media.type.toUpperCase()}</span></strong>
-                    <span>${media.artist}</span>
-                </div>
-                <div class="actions">
-                    <button class="icon-btn play-item-btn" data-index="${index}"><span class="material-icons-round">play_arrow</span></button>
-                    <button class="icon-btn delete-item-btn" data-index="${index}"><span class="material-icons-round" style="color: #ff3366;">delete</span></button>
-                </div>
-            `;
-            playlistContainer.appendChild(itemDiv);
-        });
-
-        // Evento de Play
-        document.querySelectorAll('.play-item-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const index = e.currentTarget.getAttribute('data-index');
-                if (playerEngine) playerEngine.playMedia(myPlaylist[index]);
-            });
-        });
-
-        // Evento de Excluir
-        document.querySelectorAll('.delete-item-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const index = e.currentTarget.getAttribute('data-index');
-                myPlaylist.splice(index, 1);
-                localStorage.setItem('gmusic_playlist', JSON.stringify(myPlaylist));
-                renderPlaylist();
-            });
-        });
-    }
-
-    // Traduz Link Público do Drive para Link Direto
-    function convertDriveLink(url) {
-        if (!url) return null;
-        const match = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
-        if (match && match[1]) {
-            return `https://drive.google.com/uc?export=download&id=${match[1]}`;
-        }
-        return url; // Retorna o link original caso seja uma URL direta comum
-    }
-
-    // Evento de Salvar Música/Vídeo
-    if (btnSave) {
-        btnSave.addEventListener('click', (e) => {
-            e.preventDefault(); // Impede o botão de dar refresh na página
-            
-            const driveInput = document.getElementById('upload-drive');
-            const coverInput = document.getElementById('upload-cover');
-            const titleInput = document.getElementById('upload-title');
-            const artistInput = document.getElementById('upload-artist');
-            const typeInput = document.getElementById('upload-type');
-
-            if (!driveInput || !driveInput.value) {
-                alert("⚠️ Cole o link do Google Drive para salvar!");
-                return;
+                audio.play();
+                if(playIcon) playIcon.textContent = 'pause';
+                if(coverImage) coverImage.classList.add('playing');
+                isPlaying = true;
             }
+        }
+    };
 
-            const finalSrc = convertDriveLink(driveInput.value);
-            const finalCover = convertDriveLink(coverInput.value);
-
-            const newMedia = {
-                id: Date.now(),
-                src: finalSrc,
-                title: titleInput.value || 'Mídia Desconhecida',
-                artist: artistInput.value || 'Desconhecido',
-                type: typeInput.value,
-                cover: finalCover
-            };
-
-            // Salva na Memória e no LocalStorage
-            myPlaylist.push(newMedia);
-            localStorage.setItem('gmusic_playlist', JSON.stringify(myPlaylist));
-            
-            // Limpa os campos
-            driveInput.value = '';
-            coverInput.value = '';
-            titleInput.value = '';
-            artistInput.value = '';
-            
-            alert("✅ Salvo com sucesso na sua Playlist Premium!");
-            renderPlaylist(); // Atualiza a tela imediatamente
+    if (btnCloseVideo) {
+        btnCloseVideo.addEventListener('click', () => {
+            videoPlayer.pause();
+            videoPlayer.src = "";
+            videoModal.classList.add('hidden');
         });
     }
 
-    // Exibe a lista ao carregar a página
-    renderPlaylist();
+    if (playBtn) {
+        playBtn.addEventListener('click', () => {
+            if(!audio.src) return;
+            
+            if(isPlaying) {
+                audio.pause();
+                playIcon.textContent = 'play_arrow';
+                coverImage.classList.remove('playing');
+            } else {
+                audio.play();
+                playIcon.textContent = 'pause';
+                coverImage.classList.add('playing');
+            }
+            isPlaying = !isPlaying;
+        });
+    }
+
+    const progressBar = document.getElementById('progress-bar');
+    const volumeBar = document.getElementById('volume-bar');
+    
+    if(volumeBar) {
+        volumeBar.addEventListener('input', (e) => { audio.volume = e.target.value / 100; });
+    }
+    
+    if(progressBar) {
+        audio.addEventListener('timeupdate', () => {
+            if(audio.duration) progressBar.value = (audio.currentTime / audio.duration) * 100;
+        });
+        progressBar.addEventListener('input', (e) => {
+            audio.currentTime = (e.target.value / 100) * audio.duration;
+        });
+    }
+
+    return playerEngine;
 }
