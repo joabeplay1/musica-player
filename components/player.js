@@ -94,3 +94,58 @@ export function initPlayer() {
 
     return playerEngine; // Retorna o motor para a playlist
 }
+// ... seu código de barra de progresso termina aqui em cima ...
+    
+    if(progressBar) {
+        audio.addEventListener('timeupdate', () => {
+            if(audio.duration) progressBar.value = (audio.currentTime / audio.duration) * 100;
+        });
+        progressBar.addEventListener('input', (e) => {
+            audio.currentTime = (e.target.value / 100) * audio.duration;
+        });
+    }
+
+    // =======================================================
+    // COLE O CÓDIGO DO BOTÃO SALVAR AQUI, LOGO ABAIXO DA BARRA DE PROGRESSO:
+    // =======================================================
+    const btnSalvar = document.getElementById('id-do-seu-botao-salvar');
+
+    if (btnSalvar) {
+        btnSalvar.addEventListener('click', (e) => {
+            // Impede a página de piscar/recarregar
+            e.preventDefault(); 
+
+            // Captura os links e os textos
+            const linkAudio = document.getElementById('id-do-input-audio-drive').value;
+            const linkCapa = document.getElementById('link-capa-drive').value;
+            const titulo = document.getElementById('id-do-input-titulo').value;
+            const artista = document.getElementById('id-do-input-artista').value;
+
+            if (!linkAudio || !titulo) {
+                alert("Por favor, preencha pelo menos o link do Drive e o Título!");
+                return;
+            }
+
+            try {
+                // Aqui você vai colocar o seu código de enviar para o Firebase ou Supabase
+                console.log("Pronto para enviar pro banco de dados:", { titulo, artista, linkAudio, linkCapa });
+                
+                // Limpa os campos da tela
+                document.getElementById('id-do-input-audio-drive').value = '';
+                document.getElementById('link-capa-drive').value = '';
+                document.getElementById('id-do-input-titulo').value = '';
+                document.getElementById('id-do-input-artista').value = '';
+                
+                alert("Música preparada para a playlist!");
+
+            } catch (error) {
+                console.error("Erro:", error);
+            }
+        });
+    }
+    // =======================================================
+    // FIM DO CÓDIGO DO BOTÃO SALVAR
+    // =======================================================
+
+    return playerEngine; // Retorna o motor para a playlist
+}
