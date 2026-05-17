@@ -48,33 +48,47 @@
             <section id="playlist-view" class="view">
                 <h2 class="neon-text">Sua Playlist</h2>
                 <div class="playlist-container glass-panel">
-                    <div class="empty-state">
-                        <span class="material-icons-round" style="font-size: 48px; color: var(--text-secondary);">library_music</span>
-                        <p class="text-muted">Nenhuma música na playlist ainda.</p>
+                    <div id="playlist-list">
+                        <div class="empty-state" id="playlist-empty">
+                            <span class="material-icons-round" style="font-size: 48px; color: var(--text-secondary);">library_music</span>
+                            <p class="text-muted">Nenhuma música na playlist ainda.</p>
+                        </div>
                     </div>
                 </div>
             </section>
 
             <section id="upload-view" class="view">
-                <h2 class="neon-text">Adicionar Música</h2>
+                <h2 class="neon-text">Adicionar Mídia (Drive ou PC)</h2>
                 <div class="upload-form glass-panel">
-                   <div class="form-group">
-                        <label>Link da Música (Google Drive)</label>
-                        <input type="text" id="id-do-input-audio-drive" placeholder="Cole o link do áudio aqui" class="custom-input">
-                    </div>
-                    <div class="form-group">
-                        <label>Link da Capa (Google Drive)</label>
-                        <input type="text" id="link-capa-drive" placeholder="Cole o link da imagem aqui" class="custom-input">
-                    </div>
-                    <div class="form-group">
-                        <label>Título da Música</label>
-                        <input type="text" id="id-do-input-titulo" placeholder="Ex: Galáxia Distante" class="custom-input">
-                    </div>
-                    <div class="form-group">
-                        <label>Artista</label>
-                        <input type="text" id="id-do-input-artista" placeholder="Ex: Nome do Artista" class="custom-input">
-                    </div>
-                    <button id="id-do-seu-botao-salvar" class="action-btn neon-box" style="margin-top: 10px;">Salvar na Playlist</button>
+                    <div class="form-group">
+                        <label>1. Link do Google Drive (Recomendado para salvar para sempre)</label>
+                        <input type="text" id="upload-drive" placeholder="Cole o link de compartilhamento do Drive..." class="custom-input">
+                    </div>
+                    <p class="text-muted" style="padding: 5px; font-size: 12px; margin: 0;">OU</p>
+                    <div class="form-group">
+                        <label>2. Arquivo do PC/Celular (Não fica salvo ao fechar o app)</label>
+                        <input type="file" id="upload-local" accept="audio/*,video/*" class="custom-input">
+                    </div>
+                    <div class="form-group">
+                        <label>Capa (Imagem)</label>
+                        <input type="file" id="upload-cover" accept="image/*" class="custom-input">
+                    </div>
+                    <div class="form-group">
+                        <label>Título</label>
+                        <input type="text" id="upload-title" placeholder="Ex: Galáxia Distante" class="custom-input">
+                    </div>
+                    <div class="form-group">
+                        <label>Artista / Autor</label>
+                        <input type="text" id="upload-artist" placeholder="Ex: Nome do Artista" class="custom-input">
+                    </div>
+                    <div class="form-group">
+                        <label>Tipo de Mídia</label>
+                        <select id="upload-type" class="custom-input" style="background: var(--bg-dark);">
+                            <option value="audio">Áudio (Música)</option>
+                            <option value="video">Vídeo (Clipe/Filme)</option>
+                        </select>
+                    </div>
+                    <button id="btn-save-media" class="action-btn neon-box" style="margin-top: 10px;">Salvar na Playlist</button>
                 </div>
             </section>
 
@@ -160,6 +174,14 @@
                 <input type="range" id="volume-bar" value="100" max="100">
             </div>
         </footer>
+    </div>
+
+    <div id="video-modal" class="video-modal hidden">
+        <div class="video-container glass-panel">
+            <button id="close-video-btn" class="icon-btn close-btn"><span class="material-icons-round">close</span></button>
+            <video id="main-video-player" controls crossorigin="anonymous"></video>
+            <h3 id="video-title-display" class="neon-text" style="margin-top: 15px;">Título do Vídeo</h3>
+        </div>
     </div>
 
     <script type="module" src="app.js"></script>
