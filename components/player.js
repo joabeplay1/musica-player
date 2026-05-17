@@ -3,7 +3,6 @@ export function initPlaylist(playerEngine) {
     const playlistContainer = document.getElementById('playlist-list');
     const emptyState = document.getElementById('playlist-empty');
     
-    // Tenta carregar a playlist. Se o navegador travar, ele recria.
     let myPlaylist = [];
     try {
         myPlaylist = JSON.parse(localStorage.getItem('gmusic_playlist')) || [];
@@ -26,8 +25,11 @@ export function initPlaylist(playerEngine) {
         myPlaylist.forEach((media, index) => {
             const itemDiv = document.createElement('div');
             itemDiv.className = 'playlist-item';
+            // Se não tiver capa, coloca uma imagem padrão preta com roxo
+            const coverImage = media.cover || 'https://via.placeholder.com/150/111111/bc13fe?text=Play';
+            
             itemDiv.innerHTML = `
-                <img src="${media.cover || ''}" onerror="this.src='https://via.placeholder.com/150/111111/bc13fe?text=Play'" alt="Capa">
+                <img src="${coverImage}" onerror="this.src='https://via.placeholder.com/150/111111/bc13fe?text=Erro'" alt="Capa">
                 <div class="info">
                     <strong>${media.title} <span class="media-type">${media.type.toUpperCase()}</span></strong>
                     <span>${media.artist}</span>
@@ -57,7 +59,7 @@ export function initPlaylist(playerEngine) {
         });
     }
 
-    // Extrai o ID do Google Drive de qualquer formato de link
+    // Traduz o link de compartilhamento do Drive para um link de imagem/áudio direto
     function convertDriveLink(url) {
         if (!url) return null;
         const match = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
@@ -69,30 +71,26 @@ export function initPlaylist(playerEngine) {
 
     if (btnSave) {
         btnSave.addEventListener('click', (e) => {
-            e.preventDefault(); // Impede recarregamento acidental da página
+            e.preventDefault(); 
             
+            // Pega os textos digitados
             const driveLink = document.getElementById('upload-drive').value;
+            const coverLink = document.getElementById('upload-cover').value;
             const title = document.getElementById('upload-title').value || 'Mídia Desconhecida';
             const artist = document.getElementById('upload-artist').value || 'Artista Desconhecido';
             const type = document.getElementById('upload-type').value;
-            const coverFile = document.getElementById('upload-cover').files[0];
 
             if (!driveLink) {
-                alert("⚠️ Por favor, cole o link do Google Drive!");
+                alert("⚠️ Por favor, cole o link do Google Drive da música ou vídeo!");
                 return;
             }
 
+            // Converte os links
             const finalSrc = convertDriveLink(driveLink);
+            const finalCover = coverLink ? convertDriveLink(coverLink) : null;
 
-            if (coverFile) {
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    saveToDatabase(finalSrc, title, artist, type, event.target.result);
-                };
-                reader.readAsDataURL(coverFile);
-            } else {
-                saveToDatabase(finalSrc, title, artist, type, null);
-            }
+            // Salva direto
+            saveToDatabase(finalSrc, title, artist, type, finalCover);
         });
     }
 
@@ -109,7 +107,6 @@ export function initPlaylist(playerEngine) {
         myPlaylist.push(newMedia);
         
         try {
-            // Tenta salvar no navegador
             localStorage.setItem('gmusic_playlist', JSON.stringify(myPlaylist));
             
             // Limpa os campos depois de salvar com sucesso
@@ -122,13 +119,11 @@ export function initPlaylist(playerEngine) {
             renderPlaylist();
 
         } catch (error) {
-            // Se der erro (ex: a imagem for muito pesada para o limite do navegador)
-            myPlaylist.pop(); // Remove a música defeituosa da lista
-            alert("❌ Erro ao salvar! A imagem da capa pode ser muito pesada. Tente usar uma imagem menor ou não colocar capa.");
+            myPlaylist.pop(); 
+            alert("❌ Erro ao salvar! Verifique os dados.");
             console.error(error);
         }
     }
 
-    // Renderiza a lista na tela logo no início
     renderPlaylist();
 }
