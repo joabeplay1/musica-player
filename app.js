@@ -3,30 +3,34 @@ import { initPlayer } from './components/player.js';
 import { initPlaylist } from './components/playlist.js';
 
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. Inicializa Fundo Galáctico
+    // 1. Inicia o Fundo
     initGalaxy();
 
-    // 2. Inicializa o Player
+    // 2. Inicia as ferramentas de Mídia
     const playerEngine = initPlayer();
+    
+    // O Try-Catch protege o site. Se a playlist falhar, o menu continua funcionando!
+    try {
+        initPlaylist(playerEngine);
+    } catch (error) {
+        console.error("Erro na Playlist, mas o App continua rodando:", error);
+    }
 
-    // 3. Inicializa a Playlist
-    initPlaylist(playerEngine);
-
-    // 4. SISTEMA DE MENUS (CORRIGIDO E FUNCIONAL)
+    // 3. SISTEMA DE MENUS (À Prova de Falhas)
     const menuBtns = document.querySelectorAll('.menu-btn');
     const views = document.querySelectorAll('.view');
 
     menuBtns.forEach(btn => {
         btn.addEventListener('click', (e) => {
-            // Remove a classe active de todos os botões
+            // Remove ativo de todos os botões
             menuBtns.forEach(b => b.classList.remove('active'));
-            // Adiciona a classe active no botão clicado
+            // Adiciona ativo no clicado
             e.currentTarget.classList.add('active');
             
             // Esconde todas as telas
             views.forEach(v => v.classList.remove('active'));
             
-            // Pega o alvo e mostra a tela correta
+            // Exibe a tela alvo
             const targetId = e.currentTarget.getAttribute('data-target') + '-view';
             const targetView = document.getElementById(targetId);
             if (targetView) {
