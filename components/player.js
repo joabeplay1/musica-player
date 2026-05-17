@@ -3,29 +3,35 @@ export function initPlaylist(playerEngine) {
     const playlistContainer = document.getElementById('playlist-list');
     const emptyState = document.getElementById('playlist-empty');
     
+    // Recupera a playlist do LocalStorage
     let myPlaylist = [];
     try {
         myPlaylist = JSON.parse(localStorage.getItem('gmusic_playlist')) || [];
     } catch (e) {
-        console.error("Erro ao carregar a playlist", e);
+        console.warn("Criando nova playlist vazia.");
         myPlaylist = [];
     }
 
     function renderPlaylist() {
+        if (!playlistContainer) return;
+
+        // Limpa a lista atual
         const items = playlistContainer.querySelectorAll('.playlist-item');
         items.forEach(item => item.remove());
 
         if (myPlaylist.length === 0) {
-            emptyState.style.display = 'block';
+            if (emptyState) emptyState.style.display = 'block';
             return;
         }
 
-        emptyState.style.display = 'none';
+        if (emptyState) emptyState.style.display = 'none';
 
+        // Constroi a lista
         myPlaylist.forEach((media, index) => {
             const itemDiv = document.createElement('div');
             itemDiv.className = 'playlist-item';
-            // Se não tiver capa, coloca uma imagem padrão preta com roxo
+            
+            // Capa padrão se não houver link
             const coverImage = media.cover || 'https://via.placeholder.com/150/111111/bc13fe?text=Play';
             
             itemDiv.innerHTML = `
@@ -42,13 +48,15 @@ export function initPlaylist(playerEngine) {
             playlistContainer.appendChild(itemDiv);
         });
 
+        // Evento de Play
         document.querySelectorAll('.play-item-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const index = e.currentTarget.getAttribute('data-index');
-                playerEngine.playMedia(myPlaylist[index]);
+                if (playerEngine) playerEngine.playMedia(myPlaylist[index]);
             });
         });
 
+        // Evento de Excluir
         document.querySelectorAll('.delete-item-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const index = e.currentTarget.getAttribute('data-index');
@@ -59,71 +67,59 @@ export function initPlaylist(playerEngine) {
         });
     }
 
-    // Traduz o link de compartilhamento do Drive para um link de imagem/áudio direto
+    // Traduz Link Público do Drive para Link Direto
     function convertDriveLink(url) {
         if (!url) return null;
         const match = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
         if (match && match[1]) {
             return `https://drive.google.com/uc?export=download&id=${match[1]}`;
         }
-        return url;
+        return url; // Retorna o link original caso seja uma URL direta comum
     }
 
+    // Evento de Salvar Música/Vídeo
     if (btnSave) {
         btnSave.addEventListener('click', (e) => {
-            e.preventDefault(); 
+            e.preventDefault(); // Impede o botão de dar refresh na página
             
-            // Pega os textos digitados
-            const driveLink = document.getElementById('upload-drive').value;
-            const coverLink = document.getElementById('upload-cover').value;
-            const title = document.getElementById('upload-title').value || 'Mídia Desconhecida';
-            const artist = document.getElementById('upload-artist').value || 'Artista Desconhecido';
-            const type = document.getElementById('upload-type').value;
+            const driveInput = document.getElementById('upload-drive');
+            const coverInput = document.getElementById('upload-cover');
+            const titleInput = document.getElementById('upload-title');
+            const artistInput = document.getElementById('upload-artist');
+            const typeInput = document.getElementById('upload-type');
 
-            if (!driveLink) {
-                alert("⚠️ Por favor, cole o link do Google Drive da música ou vídeo!");
+            if (!driveInput || !driveInput.value) {
+                alert("⚠️ Cole o link do Google Drive para salvar!");
                 return;
             }
 
-            // Converte os links
-            const finalSrc = convertDriveLink(driveLink);
-            const finalCover = coverLink ? convertDriveLink(coverLink) : null;
+            const finalSrc = convertDriveLink(driveInput.value);
+            const finalCover = convertDriveLink(coverInput.value);
 
-            // Salva direto
-            saveToDatabase(finalSrc, title, artist, type, finalCover);
+            const newMedia = {
+                id: Date.now(),
+                src: finalSrc,
+                title: titleInput.value || 'Mídia Desconhecida',
+                artist: artistInput.value || 'Desconhecido',
+                type: typeInput.value,
+                cover: finalCover
+            };
+
+            // Salva na Memória e no LocalStorage
+            myPlaylist.push(newMedia);
+            localStorage.setItem('gmusic_playlist', JSON.stringify(myPlaylist));
+            
+            // Limpa os campos
+            driveInput.value = '';
+            coverInput.value = '';
+            titleInput.value = '';
+            artistInput.value = '';
+            
+            alert("✅ Salvo com sucesso na sua Playlist Premium!");
+            renderPlaylist(); // Atualiza a tela imediatamente
         });
     }
 
-    function saveToDatabase(src, title, artist, type, coverData) {
-        const newMedia = {
-            id: Date.now(),
-            src: src,
-            title: title,
-            artist: artist,
-            type: type,
-            cover: coverData
-        };
-
-        myPlaylist.push(newMedia);
-        
-        try {
-            localStorage.setItem('gmusic_playlist', JSON.stringify(myPlaylist));
-            
-            // Limpa os campos depois de salvar com sucesso
-            document.getElementById('upload-drive').value = '';
-            document.getElementById('upload-title').value = '';
-            document.getElementById('upload-artist').value = '';
-            document.getElementById('upload-cover').value = '';
-            
-            alert("✅ Salvo com sucesso na Playlist!");
-            renderPlaylist();
-
-        } catch (error) {
-            myPlaylist.pop(); 
-            alert("❌ Erro ao salvar! Verifique os dados.");
-            console.error(error);
-        }
-    }
-
+    // Exibe a lista ao carregar a página
     renderPlaylist();
 }
