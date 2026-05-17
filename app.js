@@ -1,37 +1,30 @@
 import { initGalaxy } from './components/galaxy.js';
 import { initPlayer } from './components/player.js';
-import { initPlaylist } from './components/playlist.js';
 
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. Inicia o Fundo
+    // 1. Inicializa Fundo Galáctico e Player
     initGalaxy();
+    initPlayer();
 
-    // 2. Inicia as ferramentas de Mídia
-    const playerEngine = initPlayer();
-    
-    // O Try-Catch protege o site. Se a playlist falhar, o menu continua funcionando!
-    try {
-        initPlaylist(playerEngine);
-    } catch (error) {
-        console.error("Erro na Playlist, mas o App continua rodando:", error);
-    }
-
-    // 3. SISTEMA DE MENUS (À Prova de Falhas)
+    // 2. Sistema de Menus (Navegação SPA Completa)
     const menuBtns = document.querySelectorAll('.menu-btn');
     const views = document.querySelectorAll('.view');
 
     menuBtns.forEach(btn => {
         btn.addEventListener('click', (e) => {
-            // Remove ativo de todos os botões
+            // Remove a luz/estado ativo de todos os botões do menu
             menuBtns.forEach(b => b.classList.remove('active'));
-            // Adiciona ativo no clicado
+            
+            // Adiciona a luz/estado ativo apenas no botão que foi clicado
             e.currentTarget.classList.add('active');
             
-            // Esconde todas as telas
+            // Esconde TODAS as telas
             views.forEach(v => v.classList.remove('active'));
             
-            // Exibe a tela alvo
+            // Descobre qual tela abrir baseado no 'data-target' do botão
             const targetId = e.currentTarget.getAttribute('data-target') + '-view';
+            
+            // Mostra a tela correta disparando a animação do CSS
             const targetView = document.getElementById(targetId);
             if (targetView) {
                 targetView.classList.add('active');
