@@ -65,51 +65,95 @@ input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 15p
 
 .volume-controls { width: 20%; display: flex; align-items: center; gap: 10px; }
 
-.view { display: none; animation: fadeUp 0.4s ease-out forwards; height: 100%; overflow-y: auto; padding-right: 10px; }
-.view.active { display: block; }
-@keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+/* =========================================
+   SISTEMA DE NAVEGAÇÃO E TELAS (VIEWS)
+   ========================================= */
+.view {
+    display: none;
+    animation: fadeUp 0.4s ease-out forwards;
+    height: 100%;
+    overflow-y: auto;
+    padding-right: 10px;
+}
 
+.view.active {
+    display: block;
+}
+
+@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Scrollbar Personalizada */
 .view::-webkit-scrollbar { width: 8px; }
 .view::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.2); border-radius: 10px; }
 .view::-webkit-scrollbar-thumb { background: var(--neon-blue); border-radius: 10px; }
 
+/* Títulos Internos */
 h2.neon-text { margin-bottom: 20px; font-size: 28px; }
 .text-muted { color: var(--text-secondary); text-align: center; padding: 20px; }
 .empty-state { text-align: center; padding: 40px; }
 
+/* Formulários e Inputs Premium */
 .upload-form { padding: 30px; display: flex; flex-direction: column; gap: 20px; max-width: 600px; }
 .form-group { display: flex; flex-direction: column; gap: 8px; }
 .form-group label { color: var(--text-secondary); font-size: 14px; font-weight: 500; }
-.custom-input { background: rgba(0, 0, 0, 0.3); border: 1px solid var(--glass-border); border-radius: 8px; padding: 12px 15px; color: white; outline: none; transition: 0.3s; font-size: 14px; }
-.custom-input:focus { border-color: var(--neon-blue); box-shadow: 0 0 10px rgba(0, 243, 255, 0.3); }
+.custom-input {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--glass-border);
+    border-radius: 8px;
+    padding: 12px 15px;
+    color: white;
+    outline: none;
+    transition: 0.3s;
+    font-size: 14px;
+}
+.custom-input:focus { 
+    border-color: var(--neon-blue); 
+    box-shadow: 0 0 10px rgba(0, 243, 255, 0.3); 
+}
 
-.action-btn { background: linear-gradient(45deg, var(--neon-blue), var(--neon-purple)); border: none; border-radius: 8px; color: white; padding: 12px 25px; font-weight: 600; cursor: pointer; transition: 0.3s; letter-spacing: 0.5px; }
-.action-btn:hover { transform: translateY(-2px); box-shadow: 0 0 20px rgba(188, 19, 254, 0.6); }
-.action-btn.outline { background: transparent; border: 1px solid var(--neon-blue); box-shadow: none; }
+/* Botões de Ação Gerais */
+.action-btn {
+    background: linear-gradient(45deg, var(--neon-blue), var(--neon-purple));
+    border: none; border-radius: 8px; color: white;
+    padding: 12px 25px; font-weight: 600; cursor: pointer;
+    transition: 0.3s; letter-spacing: 0.5px;
+}
+.action-btn:hover { 
+    transform: translateY(-2px); 
+    box-shadow: 0 0 20px rgba(188, 19, 254, 0.6); 
+}
+.action-btn.outline { 
+    background: transparent; 
+    border: 1px solid var(--neon-blue); 
+    box-shadow: none;
+}
 .action-btn.outline:hover { background: rgba(0, 243, 255, 0.1); }
 
-.stats-grid, .gallery-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
-.stat-card { padding: 30px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+/* Grids (Monitor e Galeria) */
+.stats-grid, .gallery-grid { 
+    display: grid; 
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+    gap: 20px; 
+}
+.stat-card { 
+    padding: 30px; text-align: center; display: flex; 
+    flex-direction: column; align-items: center; gap: 10px; 
+}
 .stat-card .material-icons-round { font-size: 40px; color: var(--neon-blue); }
 .stat-card h4 { color: var(--text-secondary); font-size: 14px; font-weight: 500; }
 .stat-card p { font-size: 32px; font-weight: bold; }
 
-.gallery-item { height: 150px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: 0.3s; }
-.gallery-item:hover { transform: scale(1.05); border-color: var(--neon-purple); box-shadow: 0 0 15px rgba(188, 19, 254, 0.3); }
+.gallery-item { 
+    height: 150px; display: flex; flex-direction: column; 
+    align-items: center; justify-content: center; cursor: pointer; 
+    transition: 0.3s; 
+}
+.gallery-item:hover { 
+    transform: scale(1.05); 
+    border-color: var(--neon-purple); 
+    box-shadow: 0 0 15px rgba(188, 19, 254, 0.3);
+}
 .gallery-item .material-icons-round { font-size: 48px; color: var(--text-secondary); margin-bottom: 10px; }
-
-/* CSS DA PLAYLIST */
-.playlist-item { display: flex; align-items: center; gap: 15px; padding: 12px; border-bottom: 1px solid var(--glass-border); transition: 0.3s; cursor: pointer; border-radius: 8px; }
-.playlist-item:hover { background: rgba(0, 243, 255, 0.1); transform: translateX(5px); box-shadow: -5px 0 10px rgba(0, 243, 255, 0.2); }
-.playlist-item img { width: 50px; height: 50px; border-radius: 8px; object-fit: cover; }
-.playlist-item .info { flex-grow: 1; display: flex; flex-direction: column; }
-.playlist-item .info strong { color: var(--text-primary); font-size: 15px; }
-.playlist-item .info span { color: var(--text-secondary); font-size: 12px; }
-.playlist-item .media-type { background: var(--neon-purple); color: white; font-size: 10px; padding: 2px 6px; border-radius: 4px; margin-left: 10px; }
-
-/* MODAL DE VÍDEO */
-.video-modal { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.9); backdrop-filter: blur(10px); z-index: 1000; display: flex; align-items: center; justify-content: center; opacity: 1; transition: 0.3s; }
-.video-modal.hidden { opacity: 0; pointer-events: none; }
-.video-container { width: 80%; max-width: 1000px; padding: 20px; position: relative; display: flex; flex-direction: column; }
-.video-container video { width: 100%; border-radius: 12px; box-shadow: 0 0 30px rgba(0, 243, 255, 0.4); background: #000; }
-.close-btn { position: absolute; top: -40px; right: 0; font-size: 30px; color: var(--neon-purple); }
