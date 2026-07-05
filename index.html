@@ -37,3 +37,45 @@
         <div class="mode-card" data-mode="persuasive" onclick="selectMode(this)">🎯 Persuasivo</div>
         <div class="mode-card" data-mode="clarity" onclick="selectMode(this)">👁 Clareza</div>
       </div>
+      <div id="lang-row" class="hidden" style="display:none; gap:12px; flex-wrap:wrap;">
+        <select id="src-lang" style="padding:8px 12px; border-radius:8px; border:1px solid var(--border); background:var(--glass); color:var(--text);">
+          <option value="auto">Auto-detectar</option>
+          <option value="pt-BR">Português</option>
+          <option value="en">English</option>
+          <option value="es">Español</option>
+          <option value="fr">Français</option>
+          <option value="de">Deutsch</option>
+        </select>
+        <span style="line-height:38px; color:var(--text-muted)">→</span>
+        <select id="tgt-lang" style="padding:8px 12px; border-radius:8px; border:1px solid var(--border); background:var(--glass); color:var(--text);">
+          <option value="en">English</option>
+          <option value="pt-BR">Português</option>
+          <option value="es">Español</option>
+          <option value="fr">Français</option>
+          <option value="de">Deutsch</option>
+        </select>
+      </div>
+
+      <textarea class="text-area" id="input-text" placeholder="Digite ou cole seu texto aqui..."></textarea>
+      
+      <div class="actions-row">
+        <button class="btn" onclick="document.getElementById('input-text').value=''; document.getElementById('result-section').classList.add('hidden')">🗑 Limpar</button>
+        <button class="btn btn-primary" id="correct-btn" onclick="processText()"><span id="btn-icon">✨</span> <span id="btn-label">Corrigir</span></button>
+      </div>
+
+      <div id="result-section" class="hidden">
+        <div class="result-box" id="result-text"></div>
+        <div class="actions-row" style="margin-top:12px">
+          <button class="btn" onclick="navigator.clipboard.writeText(document.getElementById('result-text').textContent)">📋 Copiar</button>
+        </div>
+      </div>
+    </main>
+
+    <footer>Powered by Google Gemini · TextAI Pro</footer>
+  </div>
+
+  <script src="particles.js"></script>
+  <script src="navigation.js"></script>
+  <script src="api.js"></script>
+</body>
+</html>
