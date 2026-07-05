@@ -1,3 +1,4 @@
+// --- 1. Efeito Visual de Partículas de Fundo ---
 (function() {
   const canvas = document.getElementById('particles-canvas');
   const ctx = canvas.getContext('2d');
@@ -52,6 +53,8 @@
     requestAnimationFrame(loop);
   })();
 })();
+
+// --- 2. Controle de Navegação de Abas e Modos ---
 let currentMode = 'fix_errors';
 let isTranslation = false;
 
@@ -77,6 +80,8 @@ function selectMode(el) {
   el.classList.add('active');
   currentMode = el.dataset.mode;
 }
+
+// --- 3. Chamadas de API e Requisições à IA ---
 const MODE_PROMPTS = {
   fix_errors: "Corrija APENAS os erros de ortografia, gramática, pontuação e acentuação.",
   improve: "Melhore a qualidade geral da escrita.",
