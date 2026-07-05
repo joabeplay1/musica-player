@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TextAI Pro — Correção de Texto com IA</title>
+  <link rel="stylesheet" href="variables.css" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <canvas id="particles-canvas"></canvas>
+  <div class="app">
+    <header>
+      <div class="logo">
+        <div class="logo-icon">✨</div>
+        <span class="logo-title">TextAI Pro</span>
+      </div>
+    </header>
+    
+    <main>
+      <div class="mode-tabs">
+        <button class="tab-btn active" id="tab-correction" onclick="switchTab('correction')">✏️ Correção</button>
+        <button class="tab-btn" id="tab-translation" onclick="switchTab('translation')">🌐 Tradução</button>
+      </div>
+
+      <div class="modes-grid" id="modes-grid">
+        <div class="mode-card active" data-mode="fix_errors" onclick="selectMode(this)">✅ Corrigir Erros</div>
+        <div class="mode-card" data-mode="improve" onclick="selectMode(this)">✨ Melhorar</div>
+        <div class="mode-card" data-mode="professional" onclick="selectMode(this)">💼 Profissional</div>
+        <div class="mode-card" data-mode="formal" onclick="selectMode(this)">🎓 Formal</div>
+        <div class="mode-card" data-mode="informal" onclick="selectMode(this)">💬 Informal</div>
+        <div class="mode-card" data-mode="rewrite" onclick="selectMode(this)">🔄 Reescrever</div>
+        <div class="mode-card" data-mode="simplify" onclick="selectMode(this)">📉 Simplificar</div>
+        <div class="mode-card" data-mode="expand" onclick="selectMode(this)">📈 Expandir</div>
+        <div class="mode-card" data-mode="summarize" onclick="selectMode(this)">📄 Resumir</div>
+        <div class="mode-card" data-mode="humanize" onclick="selectMode(this)">❤️ Humanizar</div>
+        <div class="mode-card" data-mode="persuasive" onclick="selectMode(this)">🎯 Persuasivo</div>
+        <div class="mode-card" data-mode="clarity" onclick="selectMode(this)">👁 Clareza</div>
+      </div>
